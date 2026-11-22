@@ -1,6 +1,6 @@
 // Precision Dashboard service worker: keeps the app shell available offline.
 // Live data always comes from the network (Supabase), never from this cache.
-const CACHE = 'precision-dashboard-v2';
+const CACHE = 'precision-dashboard-v3';
 const SHELL = ['./', 'index.html', 'styles.css', 'app.js', 'supabase.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (e) => {
