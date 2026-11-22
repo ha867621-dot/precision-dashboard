@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111110">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Precision Dashboard</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="demo-banner" class="demo-banner" hidden>DEMO DATA — sample numbers for preview only, not your machine</div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <div class="brand-title">Precision Dashboard</div>
+        <div class="brand-sub" id="conn-line">Connecting…</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="refresh-btn" aria-label="Refresh">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 4a8 8 0 0 1 7.4 5H17v2h6V5h-2v2.5A10 10 0 1 0 22 12h-2a8 8 0 1 1-8-8Z"/></svg>
+    </button>
+  </header>
+
+  <main id="app">
+    <!-- LIVE -->
+    <section class="view" id="view-live" data-view="live">
+      <div id="machine-card" class="card machine"></div>
+      <div class="card">
+        <div class="card-head"><h3>Last 60 minutes</h3><span class="muted small" id="minute-note"></span></div>
+        <div id="minute-chart" class="chart"></div>
+        <div class="legend"><span><i class="line-key" style="--c:var(--s1)"></i>CPU %</span><span><i class="line-key" style="--c:var(--s2)"></i>GPU %</span><span class="muted">ticks = events</span></div>
+      </div>
+      <h2 class="section-title">Projects</h2>
+      <div id="pipeline-list" class="pipe-grid"></div>
+      <h2 class="section-title">Live feed <span class="live-dot" id="live-dot" title="live"></span></h2>
+      <div class="chips" id="feed-chips"></div>
+      <ul id="feed" class="feed"></ul>
+    </section>
+
+    <!-- TODAY / HOURLY -->
+    <section class="view" id="view-today" data-view="today" hidden>
+      <div class="day-nav">
+        <button class="icon-btn" id="day-prev" aria-label="Previous day">‹</button>
+        <div class="day-label" id="day-label">Today</div>
+        <button class="icon-btn" id="day-next" aria-label="Next day">›</button>
+      </div>
+      <div id="day-tiles" class="tiles"></div>
+      <div class="card">
+        <div class="card-head"><h3>Activity by hour</h3><span class="muted small">tap a bar</span></div>
+        <div id="hour-chart" class="chart"></div>
+        <div id="hour-legend" class="legend"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Workstation load</h3><span class="muted small" id="load-note"></span></div>
+        <div id="load-chart" class="chart"></div>
+        <div class="legend" id="load-legend"></div>
+      </div>
+      <h2 class="section-title" id="hours-title">Hour by hour</h2>
+      <div id="hour-list"></div>
+    </section>
+
+    <!-- PROJECTS BOARD -->
+    <section class="view" id="view-projects" data-view="projects" hidden>
+      <div class="chips" id="status-chips"></div>
+      <div id="board"></div>
+      <button class="fab" id="add-project">+ New project</button>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="view" id="view-settings" data-view="settings" hidden>
+      <div class="card">
+        <h3>Connection</h3>
+        <p class="muted small">From Supabase → Project Settings → API. Use the <b>publishable / anon</b> key here — never the secret key.</p>
+        <label>Project URL<input id="cfg-url" type="url" placeholder="https://xxxx.supabase.co" autocomplete="off"></label>
+        <label>Publishable (anon) key<input id="cfg-key" type="text" placeholder="sb_publishable_… or eyJ…" autocomplete="off"></label>
+        <button class="btn primary" id="cfg-save">Save &amp; connect</button>
+        <div id="account-box" class="account"></div>
+      </div>
+      <div class="card">
+        <h3>Alerts</h3>
+        <p class="muted small">Push alerts (even when this app is closed) come through the free <b>ntfy</b> app. Paste the topic name the reporter setup showed you:</p>
+        <label>ntfy topic<input id="ntfy-topic" type="text" placeholder="precision-…" autocomplete="off"></label>
+        <div id="ntfy-link" class="small"></div>
+        <label class="switch"><input type="checkbox" id="opt-vibrate"> Vibrate on errors while the app is open</label>
+        <label class="switch"><input type="checkbox" id="opt-notify"> Show a phone notification for errors &amp; finished runs while the app is open</label>
+      </div>
+      <div class="card">
+        <h3>Look</h3>
+        <div class="seg" id="theme-seg">
+          <button data-theme="auto">Auto</button><button data-theme="dark">Dark</button><button data-theme="light">Light</button>
+        </div>
+        <p class="muted small" style="margin-top:12px">Install: in Chrome tap ⋮ → <b>Add to Home screen</b>. It then opens full-screen like an app.</p>
+      </div>
+    </section>
+
+    <!-- LOGIN -->
+    <section class="view" id="view-login" data-view="login" hidden>
+      <div class="card login">
+        <span class="brand-mark big" aria-hidden="true"></span>
+        <h3>Sign in</h3>
+        <p class="muted small">Use the email and password of the user you created in Supabase → Authentication.</p>
+        <form id="login-form">
+          <label>Email<input id="login-email" type="email" autocomplete="username" required></label>
+          <label>Password<input id="login-pass" type="password" autocomplete="current-password" required></label>
+          <button class="btn primary" type="submit">Sign in</button>
+          <div id="login-msg" class="small err"></div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar" id="tabbar">
+    <button data-go="live" class="active"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><span>Live</span></button>
+    <button data-go="today"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Hourly</span></button>
+    <button data-go="projects"><svg viewBox="0 0 24 24"><path d="M3 4h7v7H3zM14 4h7v4h-7zM14 12h7v8h-7zM3 15h7v5H3z"/></svg><span>Projects</span></button>
+    <button data-go="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span>Settings</span></button>
+  </nav>
+
+  <!-- bottom sheet (project details / editor) -->
+  <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden>
+    <div class="sheet-grip"></div>
+    <div id="sheet-body"></div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+  <div id="tooltip" class="tooltip" hidden></div>
+
+  <script src="supabase.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
